@@ -1,1 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TestBurgers — Handmade Burgers, Fries &amp; Lemonade</title>
+  <meta name="description" content="TestBurgers — a neighborhood burger joint serving char-grilled hamburgers, hand-cut fries, and fresh-squeezed lemonade." />
+
+  <!-- Fonts (loaded from Google Fonts — works on GitHub Pages) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,900;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --paper: #f4efe4;
+      --paper-2: #ece4d5;
+      --ink: #191410;
+      --ink-soft: #5c5044;
+      --espresso: #191410;
+      --amber: #d4761a;
+      --mustard: #eaa72c;
+      --line: rgba(25, 20, 16, 0.12);
+      --shadow: 0 24px 60px -24px rgba(25, 20, 16, 0.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Manrope", system-ui, -apple-system, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    .wrap { width: min(1180px, 90%); margin: 0 auto; }
+
+    .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--amber);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 26px;
+      height: 1px;
+      background: var(--amber);
+    }
+
+    /* ── Announcement bar ── */
+    .topbar {
+      background: var(--espresso);
+      color: #efe6d6;
+      text-align: center;
+      font-size: 0.74rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 9px 16px;
+      font-weight: 600;
+    }
+
+    /* ── Header ── */
+    header {
+      position: fixed;
+      top: 34px; /* sits below topbar initially */
+      left: 0; right: 0;
+      z-index: 100;
+      transition: background 0.35s ease, top 0.35s ease, box-shadow 0.35s ease, padding 0.35s ease;
+    }
+    header .bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 0;
+    }
+    header.scrolled {
+      top: 0;
+      background: rgba(244, 239, 228, 0.92);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 1px 0 var(--line);
+    }
+    header.scrolled .bar { padding: 14px 0; }
+    header.scrolled .brand,
+    header.scrolled nav a { color: var(--ink); }
+    header.scrolled nav a.book { border-color: var(--ink); }
+
+    .brand {
+      font-family: "Fraunces", serif;
+      font-weight: 900;
+      font-size: 1.5rem;
+      letter-spacing: -0.01em;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+    }
+    .brand .dot { color: var(--mustard); }
+
+    nav { display: flex; align-items: center; gap: 34px; }
+    nav a {
+      color: #f3ece0;
+      font-size: 0.86rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      position: relative;
+      transition: color 0.2s;
+    }
+    nav a:not(.book)::after {
+      content: "";
+      position: absolute;
+      left: 0; bottom: -5px;
+      width: 0; height: 2px;
+      background: var(--mustard);
+      transition: width 0.25s ease;
+    }
+    nav a:not(.book):hover::after { width: 100%; }
+    nav a.book {
+      border: 1.5px solid rgba(255,255,255,0.6);
+      padding: 8px 20px;
+      border-radius: 999px;
+      transition: background 0.25s, color 0.25s, border-color 0.25s;
+    }
+    nav a.book:hover { background: var(--mustard); border-color: var(--mustard); color: var(--ink); }
+    .nav-toggle { display: none; }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      color: #fff;
+      overflow: hidden;
+    }
+    /* IMAGE ROOM: drop your burger photo at images/hero-burger.jpg */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(180deg, rgba(20,15,11,0.35) 0%, rgba(20,15,11,0.15) 35%, rgba(20,15,11,0.85) 100%),
+        url("images/hero-burger.jpg");
+      background-size: cover;
+      background-position: center;
+      /* fallback tone before the photo is added */
+      background-color: #2a1c12;
+      transform: scale(1.05);
+      transition: transform 6s ease-out;
+      z-index: 0;
+    }
+    .hero.loaded .hero-bg { transform: scale(1); }
+
+    .hero .wrap { position: relative; z-index: 2; padding: 120px 0 70px; width: min(1180px, 90%); }
+
+    .hero-inner { max-width: 760px; }
+    .hero .eyebrow { color: var(--mustard); }
+    .hero .eyebrow::before { background: var(--mustard); }
+
+    .hero h1 {
+      font-size: clamp(3rem, 9vw, 6.6rem);
+      line-height: 0.98;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      margin: 20px 0 22px;
+      text-shadow: 0 2px 30px rgba(0,0,0,0.35);
+    }
+    .hero h1 em { font-style: italic; font-weight: 500; color: var(--mustard); }
+
+    .hero p {
+      font-size: clamp(1.05rem, 2vw, 1.3rem);
+      max-width: 520px;
+      color: #f1e8db;
+      margin-bottom: 34px;
+    }
+
+    .hero-actions { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--mustard);
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 16px 34px;
+      border-radius: 999px;
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+    .btn:hover { transform: translateY(-3px); background: #f5b943; }
+    .btn.ghost { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.55); }
+    .btn.ghost:hover { background: rgba(255,255,255,0.12); }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 26px; right: max(5vw, 20px);
+      z-index: 2;
+      writing-mode: vertical-rl;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .scroll-hint::after {
+      content: "";
+      width: 1px; height: 46px;
+      background: linear-gradient(var(--mustard), transparent);
+      animation: scrollpulse 2s infinite;
+    }
+    @keyframes scrollpulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    /* ── Marquee strip ── */
+    .marquee {
+      background: var(--espresso);
+      color: var(--paper);
+      padding: 18px 0;
+      overflow: hidden;
+      white-space: nowrap;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .marquee-track {
+      display: inline-flex;
+      gap: 42px;
+      animation: slide 24s linear infinite;
+      font-family: "Fraunces", serif;
+      font-style: italic;
+      font-size: 1.4rem;
+      align-items: center;
+    }
+    .marquee-track span { display: inline-flex; align-items: center; gap: 42px; }
+    .marquee-track .star { color: var(--mustard); font-style: normal; }
+    @keyframes slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ── Section scaffolding ── */
+    section { padding: 110px 0; }
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 30px;
+      margin-bottom: 60px;
+      flex-wrap: wrap;
+    }
+    .section-head h2 {
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      line-height: 1.02;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      margin-top: 14px;
+    }
+    .section-head .lead { max-width: 360px; color: var(--ink-soft); }
+
+    /* ── Reveal animation ── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal.d1 { transition-delay: 0.08s; }
+    .reveal.d2 { transition-delay: 0.16s; }
+    .reveal.d3 { transition-delay: 0.24s; }
+
+    /* ── Menu ── */
+    .menu { background: var(--paper); }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+    .dish {
+      background: var(--paper-2);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 1px 0 var(--line);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .dish:nth-child(2) { transform: translateY(28px); }      /* staggered layout */
+    .dish:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+    .dish:nth-child(2):hover { transform: translateY(20px); }
+
+    .dish-photo {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      background: #d9cdb8; /* placeholder tone before your image loads */
+    }
+    /* IMAGE ROOM: menu photos */
+    .dish-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .dish:hover .dish-photo img { transform: scale(1.06); }
+    .dish-tag {
+      position: absolute;
+      top: 14px; left: 14px;
+      background: rgba(25,20,16,0.78);
+      color: #fff;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 999px;
+      backdrop-filter: blur(4px);
+    }
+    .dish-body { padding: 26px 26px 30px; }
+    .dish-body .row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .dish-body h3 { font-size: 1.5rem; font-weight: 600; }
+    .dish-body .price {
+      font-family: "Fraunces", serif;
+      font-weight: 600;
+      font-size: 1.35rem;
+      color: var(--amber);
+      white-space: nowrap;
+    }
+    .dish-body .dots { flex: 1; border-bottom: 1px dotted var(--line); transform: translateY(-4px); }
+    .dish-body p { color: var(--ink-soft); margin-top: 10px; font-size: 0.96rem; }
+
+    /* ── About (split) ── */
+    .about { background: var(--espresso); color: #f2e9dc; }
+    .about .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    /* IMAGE ROOM: optional — images/kitchen.jpg */
+    .about-photo {
+      aspect-ratio: 5 / 6;
+      border-radius: 20px;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(212,118,26,0.25), rgba(25,20,16,0.1)),
+        #2a2019;
+      background-size: cover;
+      background-position: center;
+    }
+    .about h2 { font-size: clamp(2rem, 4.5vw, 3.2rem); line-height: 1.05; margin: 16px 0 22px; color: #fff; }
+    .about p { color: #d8ccbc; margin-bottom: 18px; font-size: 1.06rem; }
+    .about .eyebrow { color: var(--mustard); }
+    .about .eyebrow::before { background: var(--mustard); }
+    .stats { display: flex; gap: 44px; margin-top: 34px; flex-wrap: wrap; }
+    .stat .num { font-family: "Fraunces", serif; font-size: 2.6rem; font-weight: 900; color: var(--mustard); line-height: 1; }
+    .stat .lab { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: #b9ab99; margin-top: 8px; }
+
+    /* ── Visit ── */
+    .visit { background: var(--paper); }
+    .visit-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .visit-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 34px 30px;
+      background: var(--paper-2);
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .visit-card:hover { border-color: var(--amber); transform: translateY(-4px); }
+    .visit-card h4 {
+      font-size: 0.76rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--amber); font-weight: 700; margin-bottom: 14px;
+    }
+    .visit-card p { font-size: 1.12rem; font-family: "Fraunces", serif; line-height: 1.5; }
+
+    /* ── Footer ── */
+    footer {
+      background: #120e0a;
+      color: #a99a86;
+      padding: 60px 0 34px;
+    }
+    .foot-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+      padding-bottom: 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .foot-top .brand { color: #fff; font-size: 1.8rem; }
+    .foot-links { display: flex; gap: 30px; flex-wrap: wrap; }
+    .foot-links a { font-size: 0.9rem; font-weight: 600; color: #cdbda8; }
+    .foot-links a:hover { color: var(--mustard); }
+    .foot-bottom {
+      margin-top: 26px;
+      font-size: 0.82rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      nav { gap: 22px; }
+      nav a:not(.book) { display: none; }
+      .menu-grid, .visit-grid { grid-template-columns: 1fr; }
+      .dish:nth-child(2) { transform: none; }
+      .dish:nth-child(2):hover { transform: translateY(-6px); }
+      .about .split { grid-template-columns: 1fr; gap: 34px; }
+      .about-photo { aspect-ratio: 4 / 3; }
+      section { padding: 80px 0; }
+      .scroll-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">Demo site · Now open · 11am – 9pm daily</div>
+
+  <header id="site-header">
+    <div class="wrap bar">
+      <div class="brand">TestBurgers<span class="dot">.</span></div>
+      <nav>
+        <a href="#menu">Menu</a>
+        <a href="#about">Our Story</a>
+        <a href="#visit">Visit</a>
+        <a href="#visit" class="book">Order</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── HERO ── -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="wrap">
+      <div class="hero-inner">
+        <span class="eyebrow">Neighborhood burger joint</span>
+        <h1>Char-grilled,<br>hand-built, <em>honest.</em></h1>
+        <p>No shortcuts, no gimmicks — just a great burger, hand-cut fries, and lemonade squeezed the same morning.</p>
+        <div class="hero-actions">
+          <a href="#menu" class="btn">View the menu</a>
+          <a href="#visit" class="btn ghost">Find us</a>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-hint">Scroll</div>
+  </section>
+
+  <!-- ── MARQUEE ── -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>
+        Hand-pressed patties <b class="star">✦</b> Hand-cut fries <b class="star">✦</b> Fresh-squeezed lemonade <b class="star">✦</b> Toasted daily <b class="star">✦</b>
+        Hand-pressed patties <b class="star">✦</b> Hand-cut fries <b class="star">✦</b> Fresh-squeezed lemonade <b class="star">✦</b> Toasted daily <b class="star">✦</b>
+      </span>
+    </div>
+  </div>
+
+  <!-- ── MENU ── -->
+  <section class="menu" id="menu">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="reveal">
+          <span class="eyebrow">The menu</span>
+          <h2>Three things.<br>Done properly.</h2>
+        </div>
+        <p class="lead reveal d1">We keep the list short so we can keep it perfect. Every order made fresh, to order.</p>
+      </div>
+
+      <div class="menu-grid">
+        <article class="dish reveal">
+          <div class="dish-photo">
+            <span class="dish-tag">Signature</span>
+            <!-- IMAGE ROOM → images/hamburger.jpg -->
+            <img src="images/hamburger.jpg" alt="TestBurgers hamburger" />
+          </div>
+          <div class="dish-body">
+            <div class="row">
+              <h3>The Hamburger</h3>
+              <span class="dots"></span>
+              <span class="price">$8</span>
+            </div>
+            <p>Char-grilled beef patty, crisp lettuce, ripe tomato, and our house sauce on a toasted brioche bun.</p>
+          </div>
+        </article>
+
+        <article class="dish reveal d1">
+          <div class="dish-photo">
+            <span class="dish-tag">Hand-cut</span>
+            <!-- IMAGE ROOM → images/fries.jpg -->
+            <img src="images/fries.jpg" alt="TestBurgers fries" />
+          </div>
+          <div class="dish-body">
+            <div class="row">
+              <h3>The Fries</h3>
+              <span class="dots"></span>
+              <span class="price">$3.5</span>
+            </div>
+            <p>Cut fresh every morning, double-fried until golden, and finished with flaky sea salt.</p>
+          </div>
+        </article>
+
+        <article class="dish reveal d2">
+          <div class="dish-photo">
+            <span class="dish-tag">Fresh daily</span>
+            <!-- IMAGE ROOM → images/lemonade.jpg -->
+            <img src="images/lemonade.jpg" alt="TestBurgers lemonade" />
+          </div>
+          <div class="dish-body">
+            <div class="row">
+              <h3>The Lemonade</h3>
+              <span class="dots"></span>
+              <span class="price">$2.5</span>
+            </div>
+            <p>Squeezed by hand, lightly sweetened, and poured over plenty of ice. Endlessly refreshing.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ABOUT ── -->
+  <section class="about" id="about">
+    <div class="wrap">
+      <div class="split">
+        <!-- IMAGE ROOM → set images/kitchen.jpg as the background, or leave the warm gradient -->
+        <div class="about-photo reveal" style="/* background-image: url('images/kitchen.jpg'); */"></div>
+        <div>
+          <span class="eyebrow reveal">Our story</span>
+          <h2 class="reveal d1">A short menu, cooked like it matters.</h2>
+          <p class="reveal d1">TestBurgers started with one idea: do a few things and do them right. We grind our own beef, cut our own potatoes, and squeeze our own lemons — every single day.</p>
+          <p class="reveal d2">No freezers full of shortcuts. Just simple food, made fresh, served fast, at a price that makes sense.</p>
+          <div class="stats reveal d3">
+            <div class="stat"><div class="num">100%</div><div class="lab">Fresh, never frozen</div></div>
+            <div class="stat"><div class="num">3</div><div class="lab">Things on the menu</div></div>
+            <div class="stat"><div class="num">7</div><div class="lab">Days a week</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── VISIT ── -->
+  <section class="visit" id="visit">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="reveal">
+          <span class="eyebrow">Come say hi</span>
+          <h2>Stop by.</h2>
+        </div>
+        <p class="lead reveal d1">We're on the corner, doors open, grill on. Walk in or order ahead.</p>
+      </div>
+      <div class="visit-grid">
+        <div class="visit-card reveal">
+          <h4>Find us</h4>
+          <p>123 Demo Street<br>Sampletown, USA</p>
+        </div>
+        <div class="visit-card reveal d1">
+          <h4>Hours</h4>
+          <p>Monday – Sunday<br>11:00 AM – 9:00 PM</p>
+        </div>
+        <div class="visit-card reveal d2">
+          <h4>Contact</h4>
+          <p>(555) 123-4567<br>hello@testburgers.demo</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="brand">TestBurgers<span class="dot" style="color:var(--mustard)">.</span></div>
+        <div class="foot-links">
+          <a href="#menu">Menu</a>
+          <a href="#about">Our Story</a>
+          <a href="#visit">Visit</a>
+          <a href="#home">Back to top</a>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 TestBurgers — Demo site. Not a real restaurant.</span>
+        <span>Made for demonstration purposes.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Header solidifies after scrolling past the top bar
+    const header = document.getElementById('site-header');
+    const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Gentle zoom-in on the hero image once loaded
+    requestAnimationFrame(() => document.getElementById('home').classList.add('loaded'));
+
+    // Reveal-on-scroll
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>
 
